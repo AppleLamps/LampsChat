@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lamp Chat</title>
+  <!-- Dependencies -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <link rel="stylesheet" href="lib/prism.min.css" />
+  <script src="lib/purify.min.js"></script>
+  <script type="module" src="js/export.js"></script>
+  <script type="module" src="js/chat.js"></script>
+  <script src="lib/prism.min.js"></script>
+  <script src="lib/prism-python.min.js"></script>
+  <script src="lib/prism-javascript.min.js"></script>
+  <script src="lib/prism-markup.min.js"></script>
+  <script src="lib/prism-css.min.js"></script>
+  <script src="lib/prism-json.min.js"></script>
+  <script src="lib/prism-bash.min.js"></script>
+  <script src="lib/prism-markdown.min.js"></script>
+  <script src="lib/marked.esm.js" type="module"></script>
+  <style>
+    :root {
+      /* Apple-inspired Palette */
+      --bg: #f9f9f9;
+      --sidebar-bg: #ffffff;
+      --content-bg: #ffffff;
+      --primary: #007aff;
+      --primary-hover: #005ecb;
+      --text-primary: #1d1d1f;
+      --text-secondary: #6e6e73;
+      --text-tertiary: #8a8a8e;
+      --border-light: #e5e5e5;
+      --border-medium: #d1d1d6;
+      --user-bubble-bg: #007aff;
+      --user-bubble-text: #ffffff;
+      --bot-bubble-bg: transparent;
+      --bot-bubble-text: #1d1d1f;
+      --input-bg: #f2f2f7;
+      --focus-ring: rgba(0, 122, 255, 0.3);
+      --hover-bg: rgba(0, 0, 0, 0.04); /* Subtle gray hover */
+
+      /* Font */
+      --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+
+      /* Radii */
+      --radius-s: 6px;
+      --radius-m: 10px;
+      --radius-l: 18px; /* Message bubble radius */
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: var(--font-family);
+    }
+
+    html, body {
+      height: 100%;
+      overflow: hidden; /* Prevent body scroll */
+    }
+
+    body {
+      background: var(--bg);
+      display: flex;
+      flex-direction: column;
+      color: var(--text-primary);
+      font-size: 15px;
+      line-height: 1.45;
+    }
+
+    /* ---------- Top bar ---------- */
+    header {
+      height: 52px;
+      background: var(--sidebar-bg);
+      border-bottom: 1px solid var(--border-light);
+      display: flex;
+      align-items: center;
+      padding: 0 20px;
+      font-weight: 600;
+      font-size: 17px;
+      color: var(--text-primary);
+      flex-shrink: 0;
+    }
+
+    /* ---------- Layout frame ---------- */
+    main {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      background: var(--content-bg);
+    }
+
+    /* ---------- Sidebar ---------- */
+    aside {
+      width: 260px;
+      background: var(--sidebar-bg);
+      border-right: 1px solid var(--border-light);
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+    }
+
+    .sidebar-top {
+      padding: 16px 16px 8px;
+      border-bottom: 1px solid var(--border-light); /* Separator */
+    }
+
+    .new-chat {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px; /* Increased gap */
+      width: 100%;
+      padding: 8px 12px; /* Adjusted padding */
+      text-align: center;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--primary);
+      background: transparent;
+      border: 1px solid var(--border-medium);
+      border-radius: var(--radius-m);
+      cursor: pointer;
+      transition: background-color 0.15s ease, border-color 0.15s ease;
+    }
+    .new-chat:hover {
+        background-color: rgba(0, 122, 255, 0.05);
+        border-color: var(--primary);
+    }
+    .new-chat i { /* Style for Font Awesome icon */
+        font-size: 14px; /* Match text size */
+    }
+
+    .sidebar-scroll-area {
+        flex: 1;
+        overflow-y: auto;
+        min-height: 0;
+        padding: 8px 0; /* Padding top/bottom for scroll area */
+    }
+
+    aside h2 {
+      padding: 12px 20px 6px; /* Consistent padding */
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    .sidebar-placeholder {
+        padding: 8px 20px;
+        font-size: 13px;
+        color: var(--text-tertiary);
+        font-style: italic;
+    }
+
+    /* Sidebar Bottom: User Info & Settings */
+    .sidebar-bottom {
+        padding: 12px 16px;
+        border-top: 1px solid var(--border-light);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-shrink: 0;
+    }
+
+    .user-info {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 14px;
+        font-weight: 500;
+        color: var(--text-primary);
+        /* Basic avatar circle */
+        .avatar {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background-color: var(--border-medium); /* Placeholder color */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+    }
+
+    .sidebar-btn {
+        background: none;
+        border: none;
+        color: var(--text-secondary);
+        font-size: 18px;
+        cursor: pointer;
+        padding: 5px; /* Clickable area */
+        border-radius: var(--radius-s);
+        transition: background-color 0.15s ease, color 0.15s ease;
+    }
+    .sidebar-btn:hover {
+        background-color: var(--hover-bg);
+        color: var(--text-primary);
+    }
+
+
+    /* ---------- Chat column ---------- */
+    .chat-wrapper {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      background: var(--content-bg);
+    }
+
+    /* Model Selector Area */
+    .model-selector-area {
+        padding: 12px 16px;
+        border-bottom: 1px solid var(--border-light);
+        background: var(--sidebar-bg); /* Match header/sidebar */
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex-shrink: 0; /* Prevent shrinking */
+    }
+    .model-selector-area label {
+        font-size: 14px;
+        font-weight: 500;
+        color: var(--text-secondary);
+        flex-shrink: 0; /* Prevent label shrinking */
+    }
+    .model-selector-area select {
+        flex: 1; /* Take remaining space */
+        min-width: 150px; /* Prevent becoming too small */
+        padding: 6px 10px;
+        border-radius: var(--radius-m);
+        border: 1px solid var(--border-medium);
+        font-size: 14px;
+        background-color: var(--input-bg); /* Use input background */
+        color: var(--text-primary);
+        cursor: pointer;
+    }
+    .model-selector-area select:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px var(--focus-ring);
+    }
+
+
+    .messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      background: var(--content-bg);
+      min-height: 0;
+    }
+
+    /* Placeholder when messages are empty */
+    .messages:empty::before {
+      content: "Start a new chat or select a model to begin.";
+      display: block;
+      text-align: center;
+      font-size: 14px;
+      color: var(--text-tertiary);
+      margin-top: 40px;
+      font-style: italic;
+    }
+
+    /* Message Bubbles */
+    .message {
+      max-width: 85%;
+      font-size: 15px;
+      line-height: 1.5;
+      word-wrap: break-word;
+    }
+
+    .message.user {
+      align-self: flex-end;
+      background: var(--user-bubble-bg);
+      color: var(--user-bubble-text);
+      padding: 12px 16px;
+      border-radius: var(--radius-l);
+      border-bottom-right-radius: var(--radius-s);
+    }
+
+    .message.bot {
+      align-self: flex-start;
+      color: var(--bot-bubble-text);
+      padding: 0;
+    }
+
+    /* ---------- Input area ---------- */
+    .input-bar {
+      display: flex;
+      align-items: flex-end; /* Align items to bottom */
+      padding: 12px 16px;
+      border-top: 1px solid var(--border-light);
+      background: var(--sidebar-bg);
+      gap: 8px; /* Gap between elements */
+      flex-shrink: 0;
+    }
+
+    /* Input action buttons (Upload) */
+    .input-action-btn {
+        flex-shrink: 0;
+        height: 38px; /* Match initial textarea height */
+        width: 38px;
+        padding: 0;
+        font-size: 16px; /* Icon size */
+        border: 1px solid var(--border-medium);
+        border-radius: var(--radius-m);
+        background: var(--input-bg);
+        color: var(--text-secondary);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+    }
+    .input-action-btn:hover {
+        background-color: #e8e8ed; /* Slightly darker input bg */
+        border-color: var(--border-medium);
+        color: var(--text-primary);
+    }
+
+
+    #prompt {
+      flex: 1;
+      resize: none;
+      min-height: 38px;
+      max-height: 150px;
+      padding: 8px 14px;
+      font-size: 15px;
+      line-height: 22px;
+      border: 1px solid var(--border-medium);
+      border-radius: var(--radius-m);
+      outline: none;
+      background: var(--input-bg);
+      color: var(--text-primary);
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+    #prompt:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px var(--focus-ring);
+    }
+    #prompt::placeholder {
+        color: var(--text-tertiary);
+    }
+
+    #send {
+      flex-shrink: 0;
+      height: 38px;
+      width: 38px;
+      padding: 0;
+      font-size: 18px;
+      font-weight: 500;
+      border: none;
+      border-radius: var(--radius-m);
+      background: var(--primary);
+      color: #ffffff;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background-color 0.15s ease;
+    }
+    #send:hover:not(:disabled) { background-color: var(--primary-hover); }
+    #send:disabled {
+        background-color: #a6a6ab;
+        cursor: default;
+    }
+
+    /* Scrollbar styling (WebKit/Blink) */
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb {
+        background: rgba(0, 0, 0, 0.2);
+        border-radius: 4px;
+        border: 2px solid transparent;
+        background-clip: padding-box;
+    }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(0, 0, 0, 0.3); }
+    /* Minimal scrollbar for specific areas */
+    .messages::-webkit-scrollbar-thumb,
+    .sidebar-scroll-area::-webkit-scrollbar-thumb { background: rgba(0, 0, 0, 0.15); }
+    .messages::-webkit-scrollbar-thumb:hover,
+    .sidebar-scroll-area::-webkit-scrollbar-thumb:hover { background: rgba(0, 0, 0, 0.25); }
+
+    /* Markdown Styles */
+    .message.bot p {
+      margin: 0.5em 0;
+    }
+    .message.bot p:first-child {
+      margin-top: 0;
+    }
+    .message.bot p:last-child {
+      margin-bottom: 0;
+    }
+    .message.bot a {
+      color: var(--primary);
+      text-decoration: none;
+    }
+    .message.bot a:hover {
+      text-decoration: underline;
+    }
+    .message.bot code {
+      font-family: ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas, Liberation Mono, monospace;
+      font-size: 0.9em;
+      padding: 0.2em 0.4em;
+      background: rgba(0, 0, 0, 0.04);
+      border-radius: 4px;
+    }
+    .message.bot pre {
+      background: #f6f8fa;
+      border-radius: 8px;
+      padding: 16px;
+      margin: 0.5em 0;
+      overflow-x: auto;
+    }
+    .message.bot pre code {
+      background: none;
+      padding: 0;
+      font-size: 0.9em;
+      line-height: 1.5;
+    }
+    .message.bot ul, .message.bot ol {
+      margin: 0.5em 0;
+      padding-left: 1.5em;
+    }
+    .message.bot li {
+      margin: 0.25em 0;
+    }
+    .message.bot blockquote {
+      margin: 0.5em 0;
+      padding-left: 1em;
+      border-left: 3px solid var(--border-medium);
+      color: var(--text-secondary);
+    }
+    .message.bot h1, .message.bot h2, .message.bot h3,
+    .message.bot h4, .message.bot h5, .message.bot h6 {
+      margin: 1em 0 0.5em;
+      line-height: 1.3;
+    }
+    .message.bot h1 { font-size: 1.5em; }
+    .message.bot h2 { font-size: 1.3em; }
+    .message.bot h3 { font-size: 1.2em; }
+    .message.bot h4 { font-size: 1.1em; }
+    .message.bot h5, .message.bot h6 { font-size: 1em; }
+    .message.bot table {
+      border-collapse: collapse;
+      margin: 0.5em 0;
+      width: 100%;
+    }
+    .message.bot th, .message.bot td {
+      border: 1px solid var(--border-light);
+      padding: 0.5em;
+      text-align: left;
+    }
+    .message.bot th {
+      background: rgba(0, 0, 0, 0.02);
+      font-weight: 600;
+    }
+    .message.bot img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 4px;
+    }
+    .message.bot hr {
+      border: none;
+      border-top: 1px solid var(--border-light);
+      margin: 1em 0;
+    }
+  </style>
+</head>
+<body>
+  <header>LampChat</header>
+  <main>
+    <!-- ---------- Left sidebar ---------- -->
+    <aside>
+        <div class="sidebar-top">
+            <button class="new-chat" id="newChatBtn">
+                <i class="fa-solid fa-plus"></i> New Chat
+            </button>
+        </div>
+        <div class="sidebar-scroll-area">
+            <h2>Chat History</h2>
+            <div class="sidebar-placeholder">No history yet</div>
+            <!-- Chat history items would go here -->
+
+            <h2>Projects</h2>
+            <div class="sidebar-placeholder">No projects yet</div>
+            <!-- Project items would go here -->
+        </div>
+        <div class="sidebar-bottom">
+            <div class="user-info">
+                <div class="avatar">UN</div> <!-- Placeholder Initials -->
+                <span>User Name</span> <!-- Placeholder Name -->
+            </div>
+            <button id="settingsBtn" class="sidebar-btn" title="Settings">
+                ⚙️ Settings
+            </button>
+            <button id="exportBtn" class="sidebar-btn" title="Export Chat">
+                💾 Export
+            </button>
+        </div>
+    </aside>
+
+    <!-- ---------- Chat column ---------- -->
+    <section class="chat-wrapper">
+      <!-- Model Selector -->
+      <div class="model-selector-area">
+        <label for="modelSelect">Model:</label>
+        <select id="modelSelect">
+          <option value="chatgpt-4o-latest">ChatGPT-4o</option>
+          <option value="gpt-4.1-2025-04-14">GPT-4.1</option>
+          <option value="o4-mini-2025-04-16">O4-mini (Reasoning)</option>
+          <option value="gpt-4o-mini-transcribe">GPT-4o Transcribe</option>
+          <option value="gemini-2.5-flash-preview-04-17">Gemini Flash</option>
+          <option value="gemini-2.5-pro-preview-03-25" selected>Gemini Pro</option> <!-- Default selected -->
+          <option value="grok-3-latest">Grok 3</option>
+          <option value="grok-3-mini-latest">Grok 3 Mini (Thinking)</option>
+        </select>
+      </div>
+
+      <!-- Messages Area -->
+      <div class="messages" id="messages">
+        <!-- Messages will be added here dynamically. Empty by default -->
+      </div>
+
+      <!-- Input Bar -->
+      <form class="input-bar" id="chatForm" autocomplete="off">
+        <button type="button" class="input-action-btn" id="fileUploadBtn" title="Upload File">
+            <i class="fa-solid fa-paperclip"></i>
+        </button>
+        <button type="button" class="input-action-btn" id="imageUploadBtn" title="Upload Image">
+            <i class="fa-solid fa-image"></i>
+        </button>
+        <textarea id="prompt" placeholder="Message" rows="1"></textarea>
+        <button id="send" type="submit" title="Send Message" disabled>
+            <i class="fa-solid fa-arrow-up"></i> <!-- Using Font Awesome arrow -->
+        </button>
+      </form>
+    </section>
+  </main>
+
+  <!-- ---------- Behaviour ---------- -->
+  <script type="module">
+    import { marked } from './lib/marked.esm.js';
+
+    const messages = document.getElementById("messages");
+    const form = document.getElementById("chatForm");
+    const promptInput = document.getElementById("prompt");
+    const sendButton = document.getElementById("send");
+    const newChatButton = document.getElementById("newChatBtn");
+    const fileUploadButton = document.getElementById("fileUploadBtn");
+    const imageUploadButton = document.getElementById("imageUploadBtn");
+    const settingsButton = document.getElementById("settingsBtn");
+    const modelSelect = document.getElementById("modelSelect"); // Get the select element
+
+    // Function to update send button state
+    function updateSendButtonState() {
+        sendButton.disabled = promptInput.value.trim().length === 0;
+    }
+
+    // Auto-expand textarea height
+    promptInput.addEventListener("input", () => {
+      promptInput.style.height = "auto"; // Temporarily shrink
+      const scrollHeight = promptInput.scrollHeight;
+      const maxHeight = parseInt(window.getComputedStyle(promptInput).maxHeight, 10);
+      promptInput.style.height = Math.min(scrollHeight, maxHeight) + "px";
+      updateSendButtonState();
+    });
+
+    // Handle form submission (sending message)
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const text = promptInput.value.trim();
+      if (!text) return;
+      const selectedModel = modelSelect.options[modelSelect.selectedIndex].text; // Get selected model name
+      addMessage(text, "user");
+      promptInput.value = "";
+      promptInput.style.height = "38px"; // Reset height
+      updateSendButtonState(); // Disable button
+
+      // Simulate bot reply with markdown and code blocks
+      const markdownExample = [
+        `# Welcome to ${selectedModel}!`,
+        "",
+        "Here's an example of **markdown** with:",
+        "",
+        "- Lists",
+        "- *Italics*",
+        "- [Links](https://example.com)",
+        "",
+        "## Code Blocks",
+        "",
+        "```python",
+        "def hello_world():",
+        "    print(\"Hello from Python!\")",
+        "```",
+        "",
+        "```javascript",
+        "function greet() {",
+        "    console.log(\"Hello from JavaScript!\");",
+        "}",
+        "```",
+        "",
+        "> And blockquotes too!"
+      ].join("\n");
+      setTimeout(() => addMessage(markdownExample, "bot"), 800);
+    });
+
+    // Function to add a message to the chat window
+    function addMessage(text, role) {
+      const div = document.createElement("div");
+      div.className = `message ${role}`;
+      
+      // Parse markdown for bot messages only
+      if (role === 'bot') {
+        // Parse markdown and sanitize HTML
+        const markedOptions = {
+          highlight: function(code, lang) {
+            if (Prism.languages[lang]) {
+              return Prism.highlight(code, Prism.languages[lang], lang);
+            }
+            return code;
+          }
+        };
+        const rawHtml = marked.parse(text, markedOptions);
+        const sanitizedHtml = DOMPurify.sanitize(rawHtml);
+        div.innerHTML = sanitizedHtml;
+      } else {
+        // For user messages, escape HTML
+        div.textContent = text;
+      }
+
+      messages.appendChild(div);
+      // Smooth scroll to bottom
+      messages.scrollTo({ top: messages.scrollHeight, behavior: 'smooth' });
+    }
+
+    // Handle "New Chat" button click
+    newChatButton.addEventListener("click", () => {
+      messages.innerHTML = ""; // Clear messages
+      promptInput.focus(); // Focus input
+      promptInput.value = "";
+      promptInput.style.height = "38px";
+      updateSendButtonState();
+      // Optionally add a starting message based on the currently selected model
+      const selectedModelName = modelSelect.options[modelSelect.selectedIndex].text;
+      addMessage(`New chat started with ${selectedModelName}.`, "bot");
+    });
+
+    // Handle Model Change
+    modelSelect.addEventListener("change", () => {
+        const selectedModelName = modelSelect.options[modelSelect.selectedIndex].text;
+        console.log(`Model changed to: ${selectedModelName}`);
+        // Clear chat and notify user of model change
+        messages.innerHTML = "";
+        addMessage(`Model switched to ${selectedModelName}. Start a new conversation.`, "bot");
+        promptInput.focus();
+        promptInput.value = "";
+        promptInput.style.height = "38px";
+        updateSendButtonState();
+    });
+
+
+    // Placeholder handlers for other buttons
+    fileUploadButton.addEventListener("click", () => {
+        console.log("File upload button clicked");
+        // Add actual file upload logic here
+        alert("File upload functionality not implemented yet.");
+    });
+
+    imageUploadButton.addEventListener("click", () => {
+        console.log("Image upload button clicked");
+        // Add actual image upload logic here
+        alert("Image upload functionality not implemented yet.");
+    });
+
+    settingsButton.addEventListener("click", () => {
+        console.log("Settings button clicked");
+        alert("Settings functionality not implemented yet.");
+    });
+
+
+    // Initial state update for send button
+    updateSendButtonState();
+
+    // Initial focus on the input field
+    promptInput.focus();
+
+    // Adjust initial height in case of pre-filled content
+    promptInput.dispatchEvent(new Event('input'));
+
+    // Add initial message based on default selected model
+    const initialModelName = modelSelect.options[modelSelect.selectedIndex].text;
+    addMessage(`Chat started with ${initialModelName}.`, "bot");
+
+
+  </script>
+</body>
+</html>

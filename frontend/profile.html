@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile - AI Chat Hub</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <header class="header">
+        <div class="container" style="display: flex; justify-content: space-between; align-items: center;">
+            <span>Profile</span>
+            <nav>
+                <a href="chat.html" class="nav-link" title="Back to Chat">
+                    <i class="fas fa-comments"></i>
+                </a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container" style="max-width: 800px;">
+        <!-- Nickname Card -->
+        <div class="card mb-l">
+            <div class="settings-group">
+                <h2>Your Nickname</h2>
+                <div class="input-group">
+                    <input type="text" id="nickname" placeholder="Enter your nickname" class="mb-m">
+                    <button id="saveNickname" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Save Nickname
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Usage Stats -->
+        <div class="stats-card mb-l">
+            <div class="stat-item">
+                <div class="stat-value" id="totalMessages">0</div>
+                <div class="stat-label">Messages Sent</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="totalChats">0</div>
+                <div class="stat-label">Chats Started</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="sessionTime">0m</div>
+                <div class="stat-label">Session Duration</div>
+            </div>
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="card">
+            <div class="settings-group">
+                <h2>Recent Activity</h2>
+                <div class="input-group">
+                    <div style="color: var(--text-secondary);">
+                        <p class="mb-s"><strong>Last Used Model:</strong> <span id="lastModel">-</span></p>
+                        <p class="mb-s"><strong>Last Active:</strong> <span id="lastActive">-</span></p>
+                        <p><strong>Favorite Model:</strong> <span id="favoriteModel">-</span></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Initialize stats from localStorage
+        document.addEventListener('DOMContentLoaded', () => {
+            // Load nickname
+            const nickname = localStorage.getItem('nickname') || '';
+            document.getElementById('nickname').value = nickname;
+
+            // Load usage stats
+            const stats = JSON.parse(localStorage.getItem('usage_stats') || '{}');
+            document.getElementById('totalMessages').textContent = stats.totalMessages || 0;
+            document.getElementById('totalChats').textContent = stats.totalChats || 0;
+
+            // Calculate session time
+            const sessionStart = localStorage.getItem('session_start');
+            if (sessionStart) {
+                const duration = Math.floor((Date.now() - parseInt(sessionStart)) / 60000);
+                document.getElementById('sessionTime').textContent = `${duration}m`;
+            }
+
+            // Load recent activity
+            const lastModel = localStorage.getItem('last_model') || '-';
+            const lastActive = localStorage.getItem('last_active') || '-';
+            const favoriteModel = stats.favoriteModel || '-';
+
+            document.getElementById('lastModel').textContent = lastModel;
+            document.getElementById('lastActive').textContent = new Date(lastActive).toLocaleString();
+            document.getElementById('favoriteModel').textContent = favoriteModel;
+        });
+
+        // Save nickname
+        document.getElementById('saveNickname').addEventListener('click', () => {
+            const nickname = document.getElementById('nickname').value.trim();
+            if (nickname) {
+                localStorage.setItem('nickname', nickname);
+                alert('Nickname saved successfully!');
+            }
+        });
+
+        // Update session time every minute
+        setInterval(() => {
+            const sessionStart = localStorage.getItem('session_start');
+            if (sessionStart) {
+                const duration = Math.floor((Date.now() - parseInt(sessionStart)) / 60000);
+                document.getElementById('sessionTime').textContent = `${duration}m`;
+            }
+        }, 60000);
+    </script>
+</body>
+</html>

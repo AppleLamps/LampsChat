@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings - AI Chat Hub</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <header class="header">
+        <div class="container" style="display: flex; justify-content: space-between; align-items: center;">
+            <span>Settings</span>
+            <nav>
+                <a href="chat.html" class="nav-link" title="Back to Chat">
+                    <i class="fas fa-comments"></i>
+                </a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container" style="max-width: 800px;">
+        <form id="settingsForm" class="card">
+            <!-- Default Model -->
+            <div class="settings-group">
+                <h2>Default Model</h2>
+                <div class="input-group">
+                    <select id="defaultModel" class="form-select">
+                        <option value="chatgpt-4o-latest">ChatGPT-4O Latest</option>
+                        <option value="gpt-4.1">GPT-4.1</option>
+                        <option value="o4-mini-2025-04-16">O4 Mini (Reasoning)</option>
+                        <option value="gemini-2.5-pro">Gemini 2.5 Pro</option>
+                        <option value="grok-3-latest">Grok 3</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Theme -->
+            <div class="settings-group">
+                <h2>Theme</h2>
+                <div class="radio-group">
+                    <label class="radio-label">
+                        <input type="radio" name="theme" value="light" checked>
+                        Light
+                    </label>
+                    <label class="radio-label">
+                        <input type="radio" name="theme" value="dark">
+                        Dark
+                    </label>
+                    <label class="radio-label">
+                        <input type="radio" name="theme" value="offwhite">
+                        Offwhite
+                    </label>
+                </div>
+            </div>
+
+            <!-- Features -->
+            <div class="settings-group">
+                <h2>Features</h2>
+                <div class="checkbox-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="streamingEnabled" checked>
+                        Enable Streaming by Default
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="webSearchEnabled">
+                        Enable Web Search
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="codeInterpreterEnabled">
+                        Enable Code Interpreter
+                    </label>
+                </div>
+            </div>
+
+            <!-- Buttons -->
+            <div style="display: flex; gap: 16px; margin-top: 32px;">
+                <button type="button" id="resetBtn" class="btn btn-secondary">
+                    <i class="fas fa-rotate-left"></i> Reset All Settings
+                </button>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save"></i> Save Changes
+                </button>
+            </div>
+        </form>
+    </main>
+
+    <script>
+        // Load settings from localStorage
+        document.addEventListener('DOMContentLoaded', () => {
+            const settings = JSON.parse(localStorage.getItem('settings') || '{}');
+            
+            // Apply saved settings
+            if (settings.defaultModel) {
+                document.getElementById('defaultModel').value = settings.defaultModel;
+            }
+            if (settings.theme) {
+                document.querySelector(`input[name="theme"][value="${settings.theme}"]`).checked = true;
+            }
+            if (typeof settings.streamingEnabled !== 'undefined') {
+                document.getElementById('streamingEnabled').checked = settings.streamingEnabled;
+            }
+            if (typeof settings.webSearchEnabled !== 'undefined') {
+                document.getElementById('webSearchEnabled').checked = settings.webSearchEnabled;
+            }
+            if (typeof settings.codeInterpreterEnabled !== 'undefined') {
+                document.getElementById('codeInterpreterEnabled').checked = settings.codeInterpreterEnabled;
+            }
+        });
+
+        // Save settings
+        document.getElementById('settingsForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const settings = {
+                defaultModel: document.getElementById('defaultModel').value,
+                theme: document.querySelector('input[name="theme"]:checked').value,
+                streamingEnabled: document.getElementById('streamingEnabled').checked,
+                webSearchEnabled: document.getElementById('webSearchEnabled').checked,
+                codeInterpreterEnabled: document.getElementById('codeInterpreterEnabled').checked
+            };
+            localStorage.setItem('settings', JSON.stringify(settings));
+            alert('Settings saved successfully!');
+            window.location.href = 'chat.html';
+        });
+
+        // Reset settings
+        document.getElementById('resetBtn').addEventListener('click', () => {
+            if (confirm('Are you sure you want to reset all settings to default?')) {
+                localStorage.removeItem('settings');
+                window.location.reload();
+            }
+        });
+    </script>
+</body>
+</html>

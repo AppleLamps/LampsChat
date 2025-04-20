@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Chat Hub</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <header class="header">
+        <div class="container" style="display: flex; justify-content: space-between; align-items: center;">
+            <span>AI Chat Hub</span>
+            <nav>
+                <a href="settings.html" class="nav-link" title="Settings">
+                    <i class="fas fa-gear"></i>
+                </a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container">
+        <section class="hero">
+            <h1>AI Chat Hub</h1>
+            <p>Experience seamless conversations with multiple AI models in one unified interface.</p>
+            
+            <div class="mb-l">
+                <a href="chat.html" class="btn btn-primary" style="font-size: 18px; padding: 16px 32px;">
+                    <i class="fas fa-comments mr-2"></i> Start Chatting
+                </a>
+            </div>
+
+            <div class="model-logos mt-xl" style="display: flex; justify-content: center; gap: 48px; margin-top: 48px;">
+                <!-- OpenAI -->
+                <div class="model-logo" title="OpenAI">
+                    <i class="fas fa-brain" style="font-size: 32px; color: var(--text-secondary);"></i>
+                    <div style="font-size: 14px; color: var(--text-secondary); margin-top: 8px;">OpenAI</div>
+                </div>
+                <!-- Gemini -->
+                <div class="model-logo" title="Google Gemini">
+                    <i class="fas fa-microchip" style="font-size: 32px; color: var(--text-secondary);"></i>
+                    <div style="font-size: 14px; color: var(--text-secondary); margin-top: 8px;">Gemini</div>
+                </div>
+                <!-- xAI -->
+                <div class="model-logo" title="xAI Grok">
+                    <i class="fas fa-robot" style="font-size: 32px; color: var(--text-secondary);"></i>
+                    <div style="font-size: 14px; color: var(--text-secondary); margin-top: 8px;">Grok</div>
+                </div>
+            </div>
+
+            <div class="features mt-xl" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 24px; margin-top: 64px;">
+                <div class="card text-center">
+                    <i class="fas fa-bolt mb-m" style="font-size: 24px; color: var(--primary);"></i>
+                    <h3 class="mb-s">Fast & Responsive</h3>
+                    <p style="color: var(--text-secondary);">Real-time streaming responses with minimal latency</p>
+                </div>
+                <div class="card text-center">
+                    <i class="fas fa-image mb-m" style="font-size: 24px; color: var(--primary);"></i>
+                    <h3 class="mb-s">Multi-Modal</h3>
+                    <p style="color: var(--text-secondary);">Support for text, images, audio, and file uploads</p>
+                </div>
+                <div class="card text-center">
+                    <i class="fas fa-code mb-m" style="font-size: 24px; color: var(--primary);"></i>
+                    <h3 class="mb-s">Developer Tools</h3>
+                    <p style="color: var(--text-secondary);">Built-in code interpreter and web search capabilities</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer style="text-align: center; padding: 32px; color: var(--text-tertiary); font-size: 14px;">
+        <p>© 2025 AI Chat Hub. All rights reserved.</p>
+    </footer>
+</body>
+</html>

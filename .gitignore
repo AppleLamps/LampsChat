@@ -1,0 +1,34 @@
+# Dependencies
+node_modules/
+frontend/lib/*
+!frontend/lib/download-deps.ps1
+
+# Environment variables
+.env
+.env.local
+.env.*
+!.env.example
+
+# Data and logs
+*.log
+frontend/data/*.db
+*.sqlite
+*.sqlite3
+
+# IDE and OS files
+.vscode/
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
+
+# Build outputs
+dist/
+build/
+*.min.js
+*.min.css
+
+# Temporary files
+tmp/
+temp/
+*.tmp
