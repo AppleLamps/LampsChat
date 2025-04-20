@@ -1,11 +1,12 @@
 {
-  "name": "ai-chat-backend",
+  "name": "lampschat",
   "version": "1.0.0",
-  "description": "Backend server for modular AI chatbot",
+  "description": "Full-stack modular AI chat app using OpenAI, Gemini, and xAI with streaming, media input, and code previews.",
   "main": "backend/server.js",
   "scripts": {
     "start": "node backend/server.js",
-    "dev": "nodemon backend/server.js"
+    "dev": "nodemon backend/server.js",
+    "start:frontend": "live-server frontend --port=3001"
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.0",
